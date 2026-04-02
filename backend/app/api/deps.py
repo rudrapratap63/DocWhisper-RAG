@@ -9,7 +9,7 @@ from typing import AsyncGenerator
 from app.core.config import settings
 from app.db import models
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 async def get_db() -> AsyncGenerator[AsyncSession, None] :
     async with AsyncSessionLocal() as session:
