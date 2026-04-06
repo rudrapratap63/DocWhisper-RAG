@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.db.database import Base, engine
-from app.api.routes import auth
+from app.api.routes import auth, chat
 from app.api.routes import user_routes
 from app.api.routes import document_routes
 
@@ -14,6 +14,7 @@ async def init_tables():
 app.include_router(auth.router)
 app.include_router(user_routes.router)
 app.include_router(document_routes.router)
+app.include_router(chat.router)
 
 @app.get("/")
 def home():
