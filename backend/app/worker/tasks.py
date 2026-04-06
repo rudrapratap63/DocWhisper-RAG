@@ -6,7 +6,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from app.core.supabase import supabase
 from app.db.models import Document, Status
 from app.api.deps import get_db
-from backend.app.services.document_parser import load_and_chunk_document
+from app.services.document_parser import load_and_chunk_document
 
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-l6-v2"
