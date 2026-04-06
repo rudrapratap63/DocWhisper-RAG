@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     SUPABASE_URL: str = Field(default=...)
     SUPABASE_KEY: str = Field(default=...)
+    REDIS_HOST: str = "localhost"
     # POSTMAN_API_KEY: str = Field(default=...)
     # POSTMAN_COLLECTION_ID: str = Field(default=...)
 
