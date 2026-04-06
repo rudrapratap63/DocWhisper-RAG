@@ -33,8 +33,8 @@ async def upload_document(
         
     try:
         file_content = await file.read()
-        
-        file_ext = file.filename.split(".")[-1] if "." in file.filename else "pdf"
+        filename = file.filename or "uploaded.pdf"
+        file_ext = filename.split(".")[-1] if "." in filename else "pdf"
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
         supabase_path = f"user_{current_user.id}/{unique_filename}"
         
@@ -42,7 +42,7 @@ async def upload_document(
         upload_response = supabase.storage.from_("pdf_files").upload(
             file=file_content,
             path=supabase_path,
-            file_options={"content-type": file.content_type}
+            file_options={"content-type": file.content_type or "application/pdf"}
         )
         
         # Get the public URL for the stored file
