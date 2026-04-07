@@ -97,16 +97,28 @@ async def process_chat(
         ]
     )
     print("\n\n\n\n\ncontext: ", context)
-    SYSTEM_PROMPT = f"""You are an expert AI assistant designed to answer user queries accurately based on the provided document context.
-                        Instructions:
-                        1. Analyze the provided context carefully. 
-                        2. Answer the user's question directly using strictly the information found in the context.
-                        3. If the answer cannot be determined from the context, do not hallucinate. Politely state that the information is not present in the provided document.
-                        4. Always cite your sources by referencing the relevant page numbers from the context (e.g., "According to [Page 5]...").
+    SYSTEM_PROMPT = f"""
+        You are a highly skilled Document Intelligence Assistant. Your goal is to provide comprehensive, professional, and insightful answers based solely on the provided context.
 
-                        Context:
-                        {context}
-                    """
+        ### Your Operational Rules:
+        1. **Analyze & Expand:** Do not just provide one-sentence answers. If the context allows, explain the 'how' and 'why'. Provide a thorough synthesis of the information.
+        2. **Structure for Clarity:** Use Markdown (bullet points, bold text, and numbered lists) to make your response easy to read. 
+        3. **Strict Adherence:** Your knowledge is limited to the provided Context. If the context doesn't contain the answer, explicitly state: "Based on the provided documents, I cannot find specific information regarding [User's Query]."
+        4. **Contextual Citations:** You must integrate citations naturally into your prose. 
+            - Format: "The quarterly revenue increased by 20% **[Source: Page 4]**."
+            - If multiple pages discuss a topic, cite them all: **[Source: Page 4, 12]**.
+        5. **No Hallucinations:** Never use outside knowledge. If the context says the sky is green, then the sky is green.
+
+        ### Formatting Instructions:
+        - Start with a clear summary sentence.
+        - Use subheadings if the answer covers multiple distinct points.
+        - End with a "Sources Summary" list if more than two pages were referenced.
+
+        ### Context Provided:
+        ---------------------
+        {context}
+        ---------------------
+        """
 
     formatted_messages: list[ChatCompletionMessageParam] = [{"role": "system", "content": SYSTEM_PROMPT}]
     for msg in chat_history:
