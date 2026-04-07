@@ -76,7 +76,7 @@ async def process_chat(
     print("searching chunks for query: ", query)
     search_results = vector_store.similarity_search(
         query=query,
-        score_threshold=0.8,
+        score_threshold=0.65,
         filter=models.Filter(
             must=[
                 models.FieldCondition(
@@ -91,51 +91,57 @@ async def process_chat(
         ),
     )
     print("search_results: ", search_results)
-    context = "\n\n\n".join(
-        [
-            f"Page Content: {result.page_content}\nPage Number: {result.metadata['page_label']}\nFile Location: {result.metadata['source']}"
+    
+    if not search_results:
+        ai_content = "I'm sorry, but I couldn't find any information about that in the uploaded document."
+        citations_data = []
+        print(f"🤖: {ai_content}")
+    else:
+        context = "\n\n\n".join(
+            [
+                f"Page Content: {result.page_content}\nPage Number: {result.metadata['page_label']}\nFile Location: {result.metadata['source']}"
+                for result in search_results
+            ]
+        )
+        print("\n\ncontext: ", context)
+        SYSTEM_PROMPT = f"""
+            You are a strictly context-bound Document Intelligence Assistant. Your task is to synthesize answers based ONLY on the information provided in the "Context Provided" section.
+
+            ### THE GOLDEN RULE (MANDATORY):
+            - **If the "Context Provided" section below is EMPTY, or if it does not contain the specific answer, you must state: "I'm sorry, but I couldn't find any information about that in the uploaded document."**
+            - **DO NOT** use your internal knowledge.
+            - **DO NOT** explain what a term is (like Kafka) if it is not defined in the context.
+
+            ### Operational Instructions:
+            1. **Analyze & Expand:** If information exists, provide a detailed response explaining the 'how' and 'why' based on the text.
+            2. **Strict Structure:** Use Markdown (subheadings, bolding, bullet points) for readability.
+            3. **Natural Citations:** Every factual claim must be followed by a source tag: **[Source: Page X]**.
+            4. **No Hallucinations:** You are a mirror of the document. If the document is silent on a topic, you are silent on that topic.
+
+            ### Context Provided:
+            ---------------------
+            {context if context.strip() else "NO RELEVANT CONTEXT FOUND IN DOCUMENT."}
+            ---------------------
+            """
+
+        formatted_messages: list[ChatCompletionMessageParam] = [{"role": "system", "content": SYSTEM_PROMPT}]
+        for msg in chat_history:
+            role_name = "assistant" if msg["role"] == "ai" else msg["role"]
+            formatted_messages.append({"role": role_name, "content": msg["content"]})
+
+        formatted_messages.append({"role": "user", "content": query})
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=formatted_messages,
+        )
+
+        ai_content = response.choices[0].message.content
+        print(f"🤖: {ai_content}")
+
+        citations_data = [
+            {"page_number": result.metadata.get("page_label"), "source": result.metadata.get("source")}
             for result in search_results
         ]
-    )
-    print("\n\ncontext: ", context)
-    SYSTEM_PROMPT = f"""
-        You are a strictly context-bound Document Intelligence Assistant. Your task is to synthesize answers based ONLY on the information provided in the "Context Provided" section.
-
-        ### THE GOLDEN RULE (MANDATORY):
-        - **If the "Context Provided" section below is EMPTY, or if it does not contain the specific answer, you must state: "I'm sorry, but I couldn't find any information about that in the uploaded document."**
-        - **DO NOT** use your internal knowledge.
-        - **DO NOT** explain what a term is (like Kafka) if it is not defined in the context.
-
-        ### Operational Instructions:
-        1. **Analyze & Expand:** If information exists, provide a detailed response explaining the 'how' and 'why' based on the text.
-        2. **Strict Structure:** Use Markdown (subheadings, bolding, bullet points) for readability.
-        3. **Natural Citations:** Every factual claim must be followed by a source tag: **[Source: Page X]**.
-        4. **No Hallucinations:** You are a mirror of the document. If the document is silent on a topic, you are silent on that topic.
-
-        ### Context Provided:
-        ---------------------
-        {context if context.strip() else "NO RELEVANT CONTEXT FOUND IN DOCUMENT."}
-        ---------------------
-        """
-
-    formatted_messages: list[ChatCompletionMessageParam] = [{"role": "system", "content": SYSTEM_PROMPT}]
-    for msg in chat_history:
-        role_name = "assistant" if msg["role"] == "ai" else msg["role"]
-        formatted_messages.append({"role": role_name, "content": msg["content"]})
-
-    formatted_messages.append({"role": "user", "content": query})
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=formatted_messages,
-    )
-
-    ai_content = response.choices[0].message.content
-    print(f"🤖: {ai_content}")
-
-    citations_data = [
-        {"page_number": result.metadata.get("page_label"), "source": result.metadata.get("source")}
-        for result in search_results
-    ]
 
     from app.db.models import Role
 
