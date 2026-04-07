@@ -70,7 +70,7 @@ async def process_chat(
     conversation_id: int,
 ):
     vector_store = QdrantVectorStore.from_existing_collection(
-        collection_name="learning_rag", embedding=embeddings, url=settings.QDRANT_URL
+        collection_name="user_documents", embedding=embeddings, url=settings.QDRANT_URL
     )
 
     print("searching chunks for query: ", query)
@@ -79,24 +79,24 @@ async def process_chat(
         filter=models.Filter(
             must=[
                 models.FieldCondition(
-                    key="user_id",
+                    key="metadata.user_id",
                     match=models.MatchValue(value=current_user_id),
                 ),
                 models.FieldCondition(
-                    key="document_id",
+                    key="metadata.document_id",
                     match=models.MatchValue(value=target_doc_id),
                 ),
             ]
         ),
     )
-
+    print("search_results: ", search_results)
     context = "\n\n\n".join(
         [
             f"Page Content: {result.page_content}\nPage Number: {result.metadata['page_label']}\nFile Location: {result.metadata['source']}"
             for result in search_results
         ]
     )
-
+    print("\n\n\n\n\ncontext: ", context)
     SYSTEM_PROMPT = f"""You are an expert AI assistant designed to answer user queries accurately based on the provided document context.
                         Instructions:
                         1. Analyze the provided context carefully. 
@@ -114,7 +114,7 @@ async def process_chat(
         formatted_messages.append({"role": role_name, "content": msg["content"]})
 
     formatted_messages.append({"role": "user", "content": query})
-
+    print("\n\n\n\n\n\nformatted_messages: ", formatted_messages)
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=formatted_messages,
