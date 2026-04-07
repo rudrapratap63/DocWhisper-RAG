@@ -55,7 +55,7 @@ async def upload_document(
         supabase.storage.from_("pdf_files").remove([supabase_path])
         raise HTTPException(status_code=500, detail="Database error, cleaned up storage.")
     
-    queue.enqueue(index_document, new_doc.id)
+    queue.enqueue(index_document, new_doc.id, job_timeout=3600)
     
     return {
         "message": "Upload successful", 

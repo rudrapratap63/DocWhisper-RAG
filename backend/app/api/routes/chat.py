@@ -71,6 +71,7 @@ async def send_message(
         target_doc_id=target_doc_id,
         chat_history=chat_history,
         conversation_id=active_conversation_id,
+        job_timeout=3600
     )
     return {
         "status": "processing",

@@ -76,6 +76,7 @@ async def process_chat(
     print("searching chunks for query: ", query)
     search_results = vector_store.similarity_search(
         query=query,
+        score_threshold=0.8,
         filter=models.Filter(
             must=[
                 models.FieldCondition(
@@ -96,27 +97,24 @@ async def process_chat(
             for result in search_results
         ]
     )
-    print("\n\n\n\n\ncontext: ", context)
+    print("\n\ncontext: ", context)
     SYSTEM_PROMPT = f"""
-        You are a highly skilled Document Intelligence Assistant. Your goal is to provide comprehensive, professional, and insightful answers based solely on the provided context.
+        You are a strictly context-bound Document Intelligence Assistant. Your task is to synthesize answers based ONLY on the information provided in the "Context Provided" section.
 
-        ### Your Operational Rules:
-        1. **Analyze & Expand:** Do not just provide one-sentence answers. If the context allows, explain the 'how' and 'why'. Provide a thorough synthesis of the information.
-        2. **Structure for Clarity:** Use Markdown (bullet points, bold text, and numbered lists) to make your response easy to read. 
-        3. **Strict Adherence:** Your knowledge is limited to the provided Context. If the context doesn't contain the answer, explicitly state: "Based on the provided documents, I cannot find specific information regarding [User's Query]."
-        4. **Contextual Citations:** You must integrate citations naturally into your prose. 
-            - Format: "The quarterly revenue increased by 20% **[Source: Page 4]**."
-            - If multiple pages discuss a topic, cite them all: **[Source: Page 4, 12]**.
-        5. **No Hallucinations:** Never use outside knowledge. If the context says the sky is green, then the sky is green.
+        ### THE GOLDEN RULE (MANDATORY):
+        - **If the "Context Provided" section below is EMPTY, or if it does not contain the specific answer, you must state: "I'm sorry, but I couldn't find any information about that in the uploaded document."**
+        - **DO NOT** use your internal knowledge.
+        - **DO NOT** explain what a term is (like Kafka) if it is not defined in the context.
 
-        ### Formatting Instructions:
-        - Start with a clear summary sentence.
-        - Use subheadings if the answer covers multiple distinct points.
-        - End with a "Sources Summary" list if more than two pages were referenced.
+        ### Operational Instructions:
+        1. **Analyze & Expand:** If information exists, provide a detailed response explaining the 'how' and 'why' based on the text.
+        2. **Strict Structure:** Use Markdown (subheadings, bolding, bullet points) for readability.
+        3. **Natural Citations:** Every factual claim must be followed by a source tag: **[Source: Page X]**.
+        4. **No Hallucinations:** You are a mirror of the document. If the document is silent on a topic, you are silent on that topic.
 
         ### Context Provided:
         ---------------------
-        {context}
+        {context if context.strip() else "NO RELEVANT CONTEXT FOUND IN DOCUMENT."}
         ---------------------
         """
 
@@ -126,7 +124,6 @@ async def process_chat(
         formatted_messages.append({"role": role_name, "content": msg["content"]})
 
     formatted_messages.append({"role": "user", "content": query})
-    print("\n\n\n\n\n\nformatted_messages: ", formatted_messages)
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=formatted_messages,
@@ -135,11 +132,16 @@ async def process_chat(
     ai_content = response.choices[0].message.content
     print(f"🤖: {ai_content}")
 
+    citations_data = [
+        {"page_number": result.metadata.get("page_label"), "source": result.metadata.get("source")}
+        for result in search_results
+    ]
+
     from app.db.models import Role
 
     async for db in get_db():
         ai_msg = ChatMessage(
-            conversation_id=conversation_id, content=ai_content, role=Role.AI
+            conversation_id=conversation_id, content=ai_content, role=Role.AI, citations=citations_data
         )
         db.add(ai_msg)
         await db.commit()
