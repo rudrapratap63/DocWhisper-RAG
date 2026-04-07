@@ -7,7 +7,7 @@ from app.db.models import Conversation, ChatMessage
 
 from app.core.queue import queue
 from app.worker.tasks import process_chat
-from app.schemas.chat_schema import ChatRequest
+from app.schemas.chat_schema import ChatRequest, ChatHistoryResponse, MessageResponse
 
 router = APIRouter(prefix="/chats", tags=["Chats"])
 
@@ -77,3 +77,40 @@ async def send_message(
         "conversation_id": active_conversation_id, 
         "message": "AI is thinking...",
     }
+
+@router.get("/{conversation_id}", response_model=ChatHistoryResponse)
+async def get_chat_history(
+    conversation_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # Verify ownership
+    stmt = select(Conversation).where(Conversation.id == conversation_id)
+    result = await db.execute(stmt)
+    user_conversation = result.scalars().first()
+    
+    if not user_conversation:
+        raise HTTPException(404, "Conversation not found")
+    if user_conversation.user_id != current_user.id:
+        raise HTTPException(403, "Access denied")
+
+    # Fetch messages in chronological order
+    stmt = (
+        select(ChatMessage)
+        .where(ChatMessage.conversation_id == conversation_id)
+        .order_by(ChatMessage.created_at.asc())
+    )
+    result = await db.execute(stmt)
+    messages = result.scalars().all()
+
+    return ChatHistoryResponse(
+        messages=[
+            MessageResponse(
+                id=msg.id,
+                role=msg.role.value,
+                content=msg.content,
+                citations=msg.citations # type: ignore
+            )
+            for msg in messages
+        ]
+    )
