@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = Field(default=...)
     SUPABASE_KEY: str = Field(default=...)
     REDIS_HOST: str = "localhost"
+    QDRANT_URL: str = Field(default=...)
+    GROQ_API_KEY: str = Field(default=...)
     # POSTMAN_API_KEY: str = Field(default=...)
     # POSTMAN_COLLECTION_ID: str = Field(default=...)
 
