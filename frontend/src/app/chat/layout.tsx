@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Plus, LogOut, FileText, Menu } from "lucide-react";
+import { MessageSquare, Plus, LogOut, FileText, Menu, X, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 interface Conversation {
@@ -25,15 +25,12 @@ export default function ChatLayout({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // redirect if not logged in
   if (!isAuthLoading && !user) {
     router.push("/login");
     return null;
   }
 
-  const { data: conversations = [], isLoading: isChatsLoading } = useQuery<
-    Conversation[]
-  >({
+  const { data: conversations = [], isLoading: isChatsLoading } = useQuery<Conversation[]>({
     queryKey: ["conversations"],
     queryFn: () => fetchApi("/chats/"),
     enabled: !!user,
@@ -45,92 +42,123 @@ export default function ChatLayout({
   };
 
   return (
-    <div className="flex h-screen bg-white">
-      {/* Mobile Menu Toggle */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-zinc-900 flex items-center px-4 z-50 text-white">
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="mr-3">
-          <Menu className="w-5 h-5" />
+    <div className="flex h-screen bg-[#0a0a0f] overflow-hidden">
+
+      {/* Mobile Top Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 z-50 flex items-center px-4 border-b border-white/5"
+        style={{ background: "rgba(10,10,20,0.95)", backdropFilter: "blur(20px)" }}>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="mr-3 w-8 h-8 flex items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all"
+        >
+          {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
         </button>
-        <span className="font-semibold flex items-center gap-2">
-          <FileText className="w-4 h-4" /> DocWhisper
-        </span>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+            <Sparkles className="w-3.5 h-3.5 text-white" />
+          </div>
+          <span className="font-semibold text-white text-sm tracking-tight">DocWhisper</span>
+        </div>
       </div>
 
       {/* Sidebar */}
-      <div
-        className={`fixed md:static inset-y-0 left-0 z-40 w-64 bg-zinc-900 text-zinc-300 transform transition-transform duration-200 ease-in-out flex flex-col ${
+      <aside
+        className={`fixed md:static inset-y-0 left-0 z-40 w-64 flex flex-col transform transition-transform duration-300 ease-out border-r border-white/[0.06] ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
+        style={{ background: "rgba(12,12,22,0.98)" }}
       >
-        <div className="p-4 pt-16 md:pt-4">
+        {/* Logo */}
+        <div className="hidden md:flex items-center gap-2.5 px-5 h-16 border-b border-white/[0.06] shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <span className="font-bold text-white tracking-tight">DocWhisper</span>
+        </div>
+
+        {/* New Chat Button */}
+        <div className="px-3 pt-16 md:pt-4 pb-3">
           <Link href="/chat/new" onClick={() => setIsMobileMenuOpen(false)}>
-            <Button
-              variant="outline"
-              className="w-full justify-start text-zinc-100 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Chat
-            </Button>
+            <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/80 hover:text-white border border-white/10 hover:border-white/20 hover:bg-white/5 transition-all duration-200 group">
+              <div className="w-5 h-5 rounded-md bg-white/10 group-hover:bg-white/15 flex items-center justify-center transition-all">
+                <Plus className="w-3 h-3" />
+              </div>
+              New conversation
+            </button>
           </Link>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
-          <div className="text-xs font-semibold text-zinc-500 mb-3 px-2">
-            Today
-          </div>
+        {/* Conversations List */}
+        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5 scrollbar-thin scrollbar-thumb-white/10">
+          <p className="text-[10px] font-semibold text-white/25 uppercase tracking-widest px-3 py-2 mb-1">
+            Recent
+          </p>
           {isChatsLoading ? (
-            <div className="px-2 text-sm text-zinc-500">Loading...</div>
-          ) : conversations.length === 0 ? (
-            <div className="px-2 text-sm text-zinc-500">No recent chats</div>
-          ) : (
-            conversations.map((conv) => (
-              <Link
-                key={conv.id}
-                href={`/chat/${conv.id}`}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-3 text-sm rounded-lg transition-colors group ${
-                  pathname === `/chat/${conv.id}`
-                    ? "bg-zinc-800 text-white"
-                    : "hover:bg-zinc-800/50 hover:text-zinc-100"
-                }`}
-              >
-                <MessageSquare className="w-4 h-4 shrink-0 text-zinc-400" />
-                <span className="truncate flex-1">{conv.title || "New Chat"}</span>
-              </Link>
-            ))
-          )}
-        </div>
-
-        <div className="p-4 border-t border-zinc-800 mt-auto">
-          <div className="flex items-center gap-3 mb-4 px-2">
-            <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center shrink-0 text-zinc-300 font-medium">
-              {user?.email?.charAt(0).toUpperCase() || "U"}
+            <div className="space-y-1.5 px-2">
+              {[1,2,3].map(i => (
+                <div key={i} className="h-9 rounded-lg bg-white/5 animate-pulse" />
+              ))}
             </div>
-            <span className="text-sm font-medium truncate text-zinc-200">
-              {user?.email}
-            </span>
-          </div>
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className="w-full justify-start text-zinc-400 hover:text-white hover:bg-zinc-800"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Log out
-          </Button>
-        </div>
-      </div>
+          ) : conversations.length === 0 ? (
+            <div className="px-3 py-6 text-center">
+              <MessageSquare className="w-6 h-6 text-white/20 mx-auto mb-2" />
+              <p className="text-xs text-white/30">No conversations yet</p>
+            </div>
+          ) : (
+            conversations.map((conv) => {
+              const isActive = pathname === `/chat/${conv.id}`;
+              return (
+                <Link
+                  key={conv.id}
+                  href={`/chat/${conv.id}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-all duration-150 ${
+                    isActive
+                      ? "bg-white/10 text-white"
+                      : "text-white/50 hover:text-white/80 hover:bg-white/5"
+                  }`}
+                >
+                  <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-violet-400" : "text-white/30"}`} />
+                  <span className="truncate flex-1 text-[13px]">{conv.title || "New Chat"}</span>
+                  {isActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
+                  )}
+                </Link>
+              );
+            })
+          )}
+        </nav>
 
-      {/* Main Content Overlay for Mobile */}
+        {/* User Footer */}
+        <div className="p-3 border-t border-white/[0.06] shrink-0">
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all group cursor-default">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500/30 to-indigo-600/30 border border-violet-500/30 flex items-center justify-center shrink-0">
+              <span className="text-xs font-semibold text-violet-300">
+                {user?.email?.charAt(0).toUpperCase() || "U"}
+              </span>
+            </div>
+            <span className="text-xs text-white/50 truncate flex-1">{user?.email}</span>
+            <button
+              onClick={handleLogout}
+              className="w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-white/70 hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"
+              title="Log out"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0 pt-14 md:pt-0 bg-white">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0 pt-14 md:pt-0">
         {children}
       </div>
     </div>
