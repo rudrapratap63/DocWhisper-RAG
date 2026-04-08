@@ -115,3 +115,18 @@ async def get_chat_history(
             for msg in messages
         ]
     )
+
+@router.get("/")
+async def list_conversations(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    stmt = (
+        select(Conversation)
+        .where(Conversation.user_id == current_user.id)
+        .order_by(desc(Conversation.created_at))
+    )
+    result = await db.execute(stmt)
+    conversations = result.scalars().all()
+    
+    return conversations
