@@ -1,6 +1,7 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.db.models import Status, User
 from app.api.deps import get_current_user, get_db
 from app.db import models
@@ -56,9 +57,40 @@ async def upload_document(
         raise HTTPException(status_code=500, detail="Database error, cleaned up storage.")
     
     queue.enqueue(index_document, new_doc.id, job_timeout=3600)
-    
+
     return {
         "message": "Upload successful", 
         "doc_id": new_doc.id,
         "status": new_doc.status
     }
+
+@router.get("/")
+async def list_documents(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(models.Document).where(
+        models.Document.user_id == current_user.id
+    ).order_by(models.Document.created_at.desc())
+    
+    result = await db.execute(query)
+    documents = result.scalars().all()
+    return documents
+
+@router.get("/{doc_id}")
+async def get_document(
+    doc_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(models.Document).where(
+        models.Document.id == doc_id,
+        models.Document.user_id == current_user.id
+    )
+    result = await db.execute(query)
+    document = result.scalar_one_or_none()
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    return document
