@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, Bot, User as UserIcon, UploadCloud, FileText } from "lucide-react";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 
 interface Citation {
   page_number: string;
@@ -316,7 +317,13 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                     ? 'bg-zinc-900 text-zinc-50 rounded-br-none' 
                     : 'bg-white rounded-bl-none prose prose-sm max-w-none text-zinc-800'
                 }`}>
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                  {msg.role === "user" ? (
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  ) : (
+                    <div className="prose prose-sm max-w-none prose-zinc prose-headings:font-semibold prose-pre:rounded-lg prose-pre:bg-zinc-900 prose-pre:text-zinc-100 prose-code:before:content-none prose-code:after:content-none">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  )}
                 </div>
                 
                 {msg.citations && msg.citations.length > 0 && (
