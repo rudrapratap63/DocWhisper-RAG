@@ -76,7 +76,8 @@ async def process_chat(
     print("searching chunks for query: ", query)
     search_results = vector_store.similarity_search(
         query=query,
-        score_threshold=0.65,
+        score_threshold=0.3,
+        k=4, 
         filter=models.Filter(
             must=[
                 models.FieldCondition(
