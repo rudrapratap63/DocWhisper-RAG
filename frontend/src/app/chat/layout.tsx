@@ -7,7 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Plus, LogOut, FileText, Menu, X, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Conversation {
   id: number;
@@ -25,10 +25,11 @@ export default function ChatLayout({
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  if (!isAuthLoading && !user) {
-    router.push("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.replace("/login");
+    }
+  }, [isAuthLoading, user, router]);
 
   const { data: conversations = [], isLoading: isChatsLoading } = useQuery<Conversation[]>({
     queryKey: ["conversations"],
@@ -40,6 +41,10 @@ export default function ChatLayout({
     logout();
     router.push("/login");
   };
+
+  if (!isAuthLoading && !user) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen bg-[#0a0a0f] overflow-hidden">
@@ -54,7 +59,7 @@ export default function ChatLayout({
           {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-md bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
             <Sparkles className="w-3.5 h-3.5 text-white" />
           </div>
           <span className="font-semibold text-white text-sm tracking-tight">DocWhisper</span>
@@ -63,14 +68,14 @@ export default function ChatLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-40 w-64 flex flex-col transform transition-transform duration-300 ease-out border-r border-white/[0.06] ${
+        className={`fixed md:static inset-y-0 left-0 z-40 w-64 flex flex-col transform transition-transform duration-300 ease-out border-r border-white/6 ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
         style={{ background: "rgba(12,12,22,0.98)" }}
       >
         {/* Logo */}
-        <div className="hidden md:flex items-center gap-2.5 px-5 h-16 border-b border-white/[0.06] shrink-0">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+        <div className="hidden md:flex items-center gap-2.5 px-5 h-16 border-b border-white/6 shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
           <span className="font-bold text-white tracking-tight">DocWhisper</span>
@@ -130,9 +135,9 @@ export default function ChatLayout({
         </nav>
 
         {/* User Footer */}
-        <div className="p-3 border-t border-white/[0.06] shrink-0">
+        <div className="p-3 border-t border-white/6 shrink-0">
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all group cursor-default">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500/30 to-indigo-600/30 border border-violet-500/30 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-linear-to-br from-violet-500/30 to-indigo-600/30 border border-violet-500/30 flex items-center justify-center shrink-0">
               <span className="text-xs font-semibold text-violet-300">
                 {user?.email?.charAt(0).toUpperCase() || "U"}
               </span>
