@@ -55,7 +55,7 @@ frontend/build/
 
 # JetBrains / PyCharm
 .idea/
-
+.agent/*
 # Mac
 .DS_Store
 .AppleDouble

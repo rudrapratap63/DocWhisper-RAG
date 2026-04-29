@@ -51,10 +51,10 @@ export default function LoginPage() {
   });
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-4 bg-zinc-50">
+    <div className="flex min-h-screen w-full items-center justify-center p-4 bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+          <CardTitle className="text-2xl font-bold font-heading">Login</CardTitle>
           <CardDescription>Enter your email below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
@@ -62,19 +62,19 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="m@example.com" {...register("email")} />
-              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" {...register("password")} />
-              {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
+              {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
             <Button type="submit" className="w-full" disabled={mutation.isPending}>
               {mutation.isPending ? "Logging in..." : "Login"}
             </Button>
-            <div className="text-center text-sm text-zinc-500">
+            <div className="text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline underline-offset-4 text-zinc-900">
+              <Link href="/signup" className="underline underline-offset-4 text-foreground">
                 Sign up
               </Link>
             </div>

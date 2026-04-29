@@ -206,58 +206,39 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   /* ─── Document Selection Screen ─────────────────────────────────── */
   if (isNew && !selectedDocumentId) {
     return (
-      <div className="relative h-full overflow-y-auto" style={{ background: "#07070f" }}>
-        {/* Background */}
-        <div className="pointer-events-none fixed inset-0">
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse 70% 50% at 50% -10%, rgba(109,40,217,0.15) 0%, transparent 60%), #07070f",
-            }}
-          />
-          <div
-            className="absolute inset-0 opacity-[0.02]"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)",
-              backgroundSize: "48px 48px",
-            }}
-          />
-        </div>
-
-        <div className="relative mx-auto w-full max-w-3xl space-y-6 p-6 md:p-10">
+      <div className="relative h-full overflow-y-auto bg-background">
+        <div className="mx-auto w-full max-w-3xl space-y-6 p-6 md:p-10">
           {/* Header */}
           <div className="space-y-2 pb-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-violet-500/25 bg-violet-500/10 text-violet-300 text-xs font-medium">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-secondary/25 bg-secondary/10 text-secondary text-xs font-medium">
               <Sparkles className="w-3 h-3" />
               New Conversation
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight" style={{ letterSpacing: "-0.02em" }}>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight" style={{ letterSpacing: "-0.02em" }}>
               Choose your document
             </h1>
-            <p className="text-white/40 text-[15px]">
+            <p className="text-muted-foreground text-[15px]">
               Upload a PDF or select an existing one to start chatting.
             </p>
           </div>
 
           {/* Upload Card */}
           <div
-            className="rounded-2xl border border-white/[0.07] p-6 md:p-8"
-            style={{ background: "rgba(255,255,255,0.03)" }}
+            className="rounded-xl border border-border p-6 md:p-8"
+            style={{ background: "var(--card)" }}
           >
-            <h2 className="text-base font-semibold text-white mb-5 flex items-center gap-2">
-              <UploadCloud className="w-4 h-4 text-violet-400" />
+            <h2 className="text-base font-semibold text-foreground mb-5 flex items-center gap-2">
+              <UploadCloud className="w-4 h-4 text-secondary" />
               Upload a new PDF
             </h2>
             <form onSubmit={handleUpload} className="space-y-4">
-              <label className="flex flex-col items-center justify-center w-full h-32 rounded-xl border-2 border-dashed border-white/10 hover:border-violet-500/40 hover:bg-violet-500/5 transition-all cursor-pointer group">
+              <label className="flex flex-col items-center justify-center w-full h-32 rounded-lg border-2 border-dashed border-border hover:border-secondary/40 hover:bg-secondary/5 transition-all cursor-pointer group">
                 <div className="flex flex-col items-center gap-2">
-                  <FileText className="w-8 h-8 text-white/20 group-hover:text-violet-400 transition-colors" />
-                  <span className="text-sm text-white/30 group-hover:text-white/50 transition-colors">
+                  <FileText className="w-8 h-8 text-muted-foreground/30 group-hover:text-secondary transition-colors" />
+                  <span className="text-sm text-muted-foreground/60 group-hover:text-muted-foreground transition-colors">
                     {file ? file.name : "Click to browse or drag & drop"}
                   </span>
-                  {!file && <span className="text-xs text-white/20">PDF up to 10MB</span>}
+                  {!file && <span className="text-xs text-muted-foreground/40">PDF up to 10MB</span>}
                 </div>
                 <Input
                   type="file"
@@ -271,10 +252,10 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                 type="submit"
                 disabled={!file || uploadMutation.isPending}
                 className={cn(
-                  "w-full h-11 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2",
+                  "w-full h-11 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2",
                   file && !uploadMutation.isPending
-                    ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 shadow-lg shadow-violet-500/20"
-                    : "bg-white/5 text-white/25 cursor-not-allowed"
+                    ? "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm"
+                    : "bg-muted text-muted-foreground/40 cursor-not-allowed"
                 )}
               >
                 {uploadMutation.isPending ? (
@@ -294,24 +275,24 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
 
           {/* Existing Documents */}
           <div
-            className="rounded-2xl border border-white/[0.07] p-6 md:p-8"
-            style={{ background: "rgba(255,255,255,0.03)" }}
+            className="rounded-xl border border-border p-6 md:p-8"
+            style={{ background: "var(--card)" }}
           >
-            <h2 className="text-base font-semibold text-white mb-5 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-violet-400" />
+            <h2 className="text-base font-semibold text-foreground mb-5 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-secondary" />
               Existing documents
             </h2>
 
             {isDocumentsLoading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-16 rounded-xl bg-white/5 animate-pulse" />
+                  <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
                 ))}
               </div>
             ) : documents.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 py-10 rounded-xl border border-dashed border-white/8">
-                <FileText className="w-8 h-8 text-white/15" />
-                <p className="text-sm text-white/25">No documents yet. Upload one above.</p>
+              <div className="flex flex-col items-center gap-2 py-10 rounded-lg border border-dashed border-border">
+                <FileText className="w-8 h-8 text-muted-foreground/30" />
+                <p className="text-sm text-muted-foreground/60">No documents yet. Upload one above.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
@@ -326,19 +307,19 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                       disabled={!isReady}
                       onClick={() => chooseDocument(doc.id)}
                       className={cn(
-                        "group flex items-start justify-between gap-3 rounded-xl border p-4 text-left transition-all duration-200",
+                        "group flex items-start justify-between gap-3 rounded-lg border p-4 text-left transition-all duration-200",
                         isReady
-                          ? "border-white/8 hover:border-violet-500/30 hover:bg-violet-500/5 cursor-pointer"
-                          : "border-white/5 opacity-50 cursor-not-allowed"
+                          ? "border-border hover:border-secondary/30 hover:bg-secondary/5 cursor-pointer"
+                          : "border-border/50 opacity-50 cursor-not-allowed"
                       )}
-                      style={{ background: "rgba(255,255,255,0.03)" }}
+                      style={{ background: "var(--background)" }}
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <FileText className="h-3.5 w-3.5 shrink-0 text-white/40 group-hover:text-violet-400 transition-colors" />
-                          <p className="truncate text-[13px] font-medium text-white/80">{doc.file_name}</p>
+                          <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground group-hover:text-secondary transition-colors" />
+                          <p className="truncate text-[13px] font-medium text-foreground">{doc.file_name}</p>
                         </div>
-                        <p className="text-xs text-white/30 pl-5">
+                        <p className="text-xs text-muted-foreground/60 pl-5">
                           {isReady ? "Ready to chat" : isProcessing ? "Processing…" : "Failed"}
                         </p>
                       </div>
@@ -346,10 +327,10 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                         className={cn(
                           "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
                           isReady
-                            ? "bg-emerald-500/15 text-emerald-400"
+                            ? "bg-green-100 text-green-700"
                             : isProcessing
-                            ? "bg-amber-500/15 text-amber-400"
-                            : "bg-rose-500/15 text-rose-400"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-red-100 text-red-700"
                         )}
                       >
                         {normalizedStatus || "unknown"}
@@ -369,25 +350,14 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   const canSend = input.trim().length > 0;
 
   return (
-    <div className="relative flex h-full flex-col" style={{ background: "#07070f" }}>
-      {/* Background */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(109,40,217,0.1) 0%, transparent 60%), #07070f",
-          }}
-        />
-      </div>
-
+    <div className="relative flex h-full flex-col" style={{ background: "#FFFFFF" }}>
       {/* Document badge */}
       {isNew && selectedDocument && (
-        <div className="relative z-10 flex items-center gap-2 px-5 py-3 border-b border-white/[0.05]"
-          style={{ background: "rgba(255,255,255,0.02)" }}>
-          <FileText className="w-3.5 h-3.5 text-violet-400 shrink-0" />
-          <span className="text-xs text-white/40">
-            Chatting with <span className="text-white/70 font-medium">{selectedDocument.file_name}</span>
+        <div className="relative z-10 flex items-center gap-2 px-5 py-3 border-b border-border"
+          style={{ background: "var(--background)" }}>
+          <FileText className="w-3.5 h-3.5 text-secondary shrink-0" />
+          <span className="text-xs text-muted-foreground">
+            Chatting with <span className="text-foreground font-medium">{selectedDocument.file_name}</span>
           </span>
         </div>
       )}
@@ -397,12 +367,12 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
         <div className="mx-auto max-w-2xl space-y-6 px-4 py-8 pb-40">
           {messages.length === 0 && !isPolling && (
             <div className="flex flex-col items-center justify-center mt-16 gap-4 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20 border border-violet-500/20 flex items-center justify-center">
-                <Bot className="w-7 h-7 text-violet-300" />
+              <div className="w-14 h-14 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center">
+                <Bot className="w-7 h-7 text-secondary" />
               </div>
               <div>
-                <p className="text-lg font-semibold text-white">Ask anything about your document</p>
-                <p className="mt-1 text-sm text-white/35">Responses include citations when available.</p>
+                <p className="text-lg font-semibold text-foreground">Ask anything about your document</p>
+                <p className="mt-1 text-sm text-muted-foreground">Responses include citations when available.</p>
               </div>
             </div>
           )}
@@ -413,8 +383,8 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
               className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role !== "user" && (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20 border border-violet-500/20">
-                  <Bot className="h-4 w-4 text-violet-300" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary/10 border border-secondary/20">
+                  <Bot className="h-4 w-4 text-secondary" />
                 </div>
               )}
 
@@ -423,19 +393,19 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                   className={cn(
                     "text-[14.5px] leading-relaxed",
                     msg.role === "user"
-                      ? "rounded-2xl rounded-br-sm bg-white text-neutral-900 px-4 py-3 shadow-sm"
-                      : "rounded-2xl rounded-bl-sm border border-white/[0.07] px-4 py-3 text-white/85"
+                      ? "rounded-xl rounded-br-sm bg-primary text-primary-foreground px-4 py-3 shadow-sm"
+                      : "rounded-xl rounded-bl-sm border border-border px-4 py-3 text-foreground"
                   )}
                   style={
                     msg.role !== "user"
-                      ? { background: "rgba(255,255,255,0.04)" }
+                      ? { background: "var(--muted)" }
                       : undefined
                   }
                 >
                   {msg.role === "user" ? (
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                   ) : (
-                    <div className="prose prose-sm max-w-none prose-invert prose-p:leading-7 prose-headings:font-semibold prose-pre:rounded-xl prose-pre:bg-black/60 prose-pre:border prose-pre:border-white/10 prose-code:before:content-none prose-code:after:content-none prose-code:text-violet-300 prose-code:bg-violet-500/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
+                    <div className="prose prose-sm max-w-none prose-p:leading-7 prose-headings:font-semibold prose-pre:rounded-lg prose-pre:bg-muted prose-pre:border prose-code:text-secondary prose-code:bg-secondary/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   )}
@@ -446,7 +416,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                     {msg.citations.map((cit, idx) => (
                       <span
                         key={idx}
-                        className="rounded-full border border-violet-500/20 bg-violet-500/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-violet-300"
+                        className="rounded-full border border-secondary/20 bg-secondary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-secondary"
                       >
                         p.{cit.page_number}
                       </span>
@@ -456,8 +426,8 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
               </div>
 
               {msg.role === "user" && (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10 border border-white/10">
-                  <UserIcon className="h-4 w-4 text-white/60" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted border border-border">
+                  <UserIcon className="h-4 w-4 text-muted-foreground" />
                 </div>
               )}
             </div>
@@ -465,23 +435,23 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
 
           {isPolling && (
             <div className="flex gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20 border border-violet-500/20">
-                <Bot className="h-4 w-4 text-violet-300" />
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary/10 border border-secondary/20">
+                <Bot className="h-4 w-4 text-secondary" />
               </div>
               <div
-                className="flex items-center gap-2.5 rounded-2xl rounded-bl-sm border border-white/[0.07] px-4 py-3"
-                style={{ background: "rgba(255,255,255,0.04)" }}
+                className="flex items-center gap-2.5 rounded-xl rounded-bl-sm border border-border px-4 py-3"
+                style={{ background: "var(--muted)" }}
               >
                 <span className="flex gap-1">
                   {[0, 1, 2].map((i) => (
                     <span
                       key={i}
-                      className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce"
+                      className="w-1.5 h-1.5 rounded-full bg-secondary animate-bounce"
                       style={{ animationDelay: `${i * 0.15}s`, animationDuration: "0.8s" }}
                     />
                   ))}
                 </span>
-                <span className="text-sm text-white/40">Thinking…</span>
+                <span className="text-sm text-muted-foreground">Thinking…</span>
               </div>
             </div>
           )}
@@ -492,18 +462,18 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
 
       {/* Floating Input Bar */}
       <div className="absolute bottom-0 left-0 right-0 z-20 px-4 pb-6 pt-10"
-        style={{ background: "linear-gradient(to top, #07070f 60%, transparent)" }}>
+        style={{ background: "linear-gradient(to top, #FFFFFF 60%, transparent)" }}>
         <div className="mx-auto max-w-2xl">
           <form onSubmit={handleSend}>
             <div
-              className="relative rounded-2xl border transition-all duration-300"
+              className="relative rounded-xl border transition-all duration-300"
               style={{
-                background: "rgba(18,18,30,0.95)",
+                background: "var(--background)",
                 backdropFilter: "blur(20px)",
-                borderColor: canSend ? "rgba(139,92,246,0.35)" : "rgba(255,255,255,0.08)",
+                borderColor: canSend ? "var(--secondary)" : "var(--border)",
                 boxShadow: canSend
-                  ? "0 0 0 1px rgba(139,92,246,0.15), 0 20px 50px rgba(0,0,0,0.7), 0 0 30px rgba(139,92,246,0.08)"
-                  : "0 20px 50px rgba(0,0,0,0.6)",
+                  ? "0 0 0 1px var(--secondary/20), 0 4px 12px rgba(0,0,0,0.1)"
+                  : "0 4px 12px rgba(0,0,0,0.05)",
               }}
             >
               <Textarea
@@ -521,7 +491,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                     handleSend(e as any);
                   }
                 }}
-                className="min-h-[52px] w-full resize-none border-none bg-transparent px-5 pt-4 pb-2 text-[14.5px] leading-relaxed text-white placeholder:text-white/25 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="min-h-[52px] w-full resize-none border-none bg-transparent px-5 pt-4 pb-2 text-[14.5px] leading-relaxed text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
                 disabled={sendMutation.isPending || (isNew && !selectedDocumentId)}
                 style={{ overflow: "hidden", maxHeight: 160 }}
               />
@@ -529,7 +499,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
               <div className="flex items-center justify-between px-4 py-3">
                 <button
                   type="button"
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all text-xs"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-xs"
                   aria-label="Attach file"
                 >
                   <Paperclip className="h-3.5 w-3.5" />
@@ -540,10 +510,10 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                   type="submit"
                   disabled={!canSend || sendMutation.isPending || isPolling || (isNew && !selectedDocumentId)}
                   className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200",
+                    "flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200",
                     canSend && !isPolling
-                      ? "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 hover:scale-105 active:scale-95"
-                      : "bg-white/6 text-white/20 cursor-not-allowed"
+                      ? "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm"
+                      : "bg-muted text-muted-foreground/40 cursor-not-allowed"
                   )}
                 >
                   {isPolling ? (
@@ -555,7 +525,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                 </button>
               </div>
             </div>
-            <p className="text-center mt-2 text-[11px] text-white/18">
+            <p className="text-center mt-2 text-[11px] text-muted-foreground/60">
               Press Enter to send · Shift+Enter for new line
             </p>
           </form>
