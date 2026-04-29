@@ -50,8 +50,7 @@ export default function ChatLayout({
     <div className="flex h-screen bg-background overflow-hidden">
 
       {/* Mobile Top Bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 z-50 flex items-center px-4 border-b border-border"
-        style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(20px)" }}>
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 z-50 flex items-center px-4 border-b border-border bg-background/95 backdrop-blur-sm">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="mr-3 w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
@@ -59,8 +58,8 @@ export default function ChatLayout({
           {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-secondary flex items-center justify-center">
-            <Sparkles className="w-3.5 h-3.5 text-secondary-foreground" />
+          <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
+            <Sparkles className="w-3 h-3 text-primary-foreground" />
           </div>
           <span className="font-semibold text-foreground text-sm tracking-tight">DocWhisper</span>
         </div>
@@ -68,15 +67,14 @@ export default function ChatLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-40 w-64 flex flex-col transform transition-transform duration-300 ease-out border-r border-border ${
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        className={`fixed md:static inset-y-0 left-0 z-40 w-64 flex flex-col border-r border-border bg-sidebar transition-transform duration-300 ease-out md:translate-x-0 ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
-        style={{ background: "var(--sidebar)" }}
       >
         {/* Logo */}
         <div className="hidden md:flex items-center gap-2.5 px-5 h-16 border-b border-border shrink-0">
-          <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-secondary-foreground" />
+          <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
+            <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
           </div>
           <span className="font-bold text-foreground tracking-tight">DocWhisper</span>
         </div>
@@ -84,17 +82,15 @@ export default function ChatLayout({
         {/* New Chat Button */}
         <div className="px-3 pt-16 md:pt-4 pb-3">
           <Link href="/chat/new" onClick={() => setIsMobileMenuOpen(false)}>
-            <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:text-foreground border border-border hover:border-secondary/30 hover:bg-secondary/5 transition-all duration-200 group">
-              <div className="w-5 h-5 rounded-md bg-muted group-hover:bg-secondary/10 flex items-center justify-center transition-all">
-                <Plus className="w-3 h-3" />
-              </div>
+            <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground border border-border hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 group">
+              <Plus className="w-3.5 h-3.5" />
               New conversation
             </button>
           </Link>
         </div>
 
         {/* Conversations List */}
-        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5 scrollbar-thin scrollbar-thumb-border">
+        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-3 py-2 mb-1">
             Recent
           </p>
@@ -119,14 +115,14 @@ export default function ChatLayout({
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 ${
                     isActive
-                      ? "bg-secondary/10 text-foreground"
+                      ? "bg-primary/5 text-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
-                  <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-secondary" : "text-muted-foreground/50"}`} />
+                  <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground/50"}`} />
                   <span className="truncate flex-1 text-[13px]">{conv.title || "New Chat"}</span>
                   {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                   )}
                 </Link>
               );
@@ -137,8 +133,8 @@ export default function ChatLayout({
         {/* User Footer */}
         <div className="p-3 border-t border-border shrink-0">
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-all group cursor-default">
-            <div className="w-8 h-8 rounded-full bg-secondary/10 border border-secondary/30 flex items-center justify-center shrink-0">
-              <span className="text-xs font-semibold text-secondary">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+              <span className="text-xs font-medium text-primary-foreground">
                 {user?.email?.charAt(0).toUpperCase() || "U"}
               </span>
             </div>
