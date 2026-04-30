@@ -4,6 +4,9 @@ from pydantic_settings import SettingsConfigDict, BaseSettings
 class Settings(BaseSettings):
     DATABASE_URL: str = Field(default=...)
 
+    CLERK_FRONTEND_API: str = Field(default=...)
+    CLERK_SECRET_KEY: str = Field(default=...)
+    
     SECRET_KEY: str = Field(default=...)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"

@@ -25,10 +25,10 @@ class User(Base, TimestampMixin):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    clerk_id: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(255))
     email: Mapped[str] = mapped_column(String(255), index=True, unique=True)
-    password: Mapped[str] = mapped_column()
-
+    
     documents: Mapped[List["Document"]] = relationship(back_populates="owner")
     conversations: Mapped[List["Conversation"]] = relationship(back_populates="user")
 
