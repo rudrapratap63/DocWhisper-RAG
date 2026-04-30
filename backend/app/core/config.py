@@ -6,6 +6,7 @@ class Settings(BaseSettings):
 
     CLERK_FRONTEND_API: str = Field(default=...)
     CLERK_SECRET_KEY: str = Field(default=...)
+    CLERK_WEBHOOK_SECRET: str = Field(default="")
     
     SECRET_KEY: str = Field(default=...)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
