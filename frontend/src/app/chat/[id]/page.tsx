@@ -16,7 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { fetchApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -54,7 +54,8 @@ interface UploadResponse {
 export default function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
 
-  const { user, isLoading: isAuthLoading } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();
   const documentId = searchParams.get("documentId");
@@ -72,22 +73,30 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!isAuthLoading && !user) {
-      router.push("/login");
+    if (isLoaded && !isSignedIn) {
+      router.push("/sign-in");
     }
-  }, [user, isAuthLoading, router]);
+  }, [isLoaded, isSignedIn, router]);
+
+  const { getToken } = useAuth();
 
   const { data: documents = [], isLoading: isDocumentsLoading } = useQuery<Document[]>({
     queryKey: ["documents"],
-    queryFn: () => fetchApi("/documents/"),
-    enabled: !!user && isNew,
+    queryFn: async () => {
+      const token = await getToken();
+      return fetchApi("/documents/", { token: token || undefined });
+    },
+    enabled: !!isSignedIn && isNew,
     refetchInterval: isNew ? 3000 : false,
   });
 
   const { data: chatHistory } = useQuery<ChatHistoryResponse>({
     queryKey: ["chat", conversationId],
-    queryFn: () => fetchApi(`/chats/${conversationId}`),
-    enabled: !!conversationId && !!user,
+    queryFn: async () => {
+      const token = await getToken();
+      return fetchApi(`/chats/${conversationId}`, { token: token || undefined });
+    },
+    enabled: !!conversationId && !!isSignedIn,
     refetchInterval: isPolling ? 2000 : false,
   });
 
@@ -110,12 +119,17 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
     textarea.style.height = `${nextHeight}px`;
   }, [input]);
 
+
+  
   const uploadMutation = useMutation({
-    mutationFn: (formData: FormData) =>
-      fetchApi<UploadResponse>("/documents/upload", {
+    mutationFn: async (formData: FormData) => {
+      const token = await getToken();
+      return fetchApi<UploadResponse>("/documents/upload", {
         method: "POST",
         body: formData,
-      }),
+        token: token || undefined,
+      });
+    },
     onSuccess: (data) => {
       toast.success("Document uploaded. Processing started.");
       setFile(null);
@@ -150,13 +164,15 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
         return { previousChat };
       }
     },
-    mutationFn: (messageText: string) => {
+    mutationFn: async (messageText: string) => {
+      const token = await getToken();
       const body = isNew
         ? { document_id: selectedDocumentId, message: messageText }
         : { conversation_id: conversationId, message: messageText };
       return fetchApi<{ status: string; conversation_id: number; message: string }>("/chats/send", {
         method: "POST",
         body: JSON.stringify(body),
+        token: token || undefined,
       });
     },
     onSuccess: (data) => {

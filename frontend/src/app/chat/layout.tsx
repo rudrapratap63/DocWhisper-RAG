@@ -1,8 +1,8 @@
 "use client";
 
-import { useAuth } from "@/contexts/auth-context";
-import { fetchApi } from "@/lib/api";
+import { useUser, useAuth, SignOutButton } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/api";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,34 +15,41 @@ interface Conversation {
   created_at: string;
 }
 
+interface Conversation {
+  id: number;
+  title: string;
+  created_at: string;
+}
+
 export default function ChatLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, logout, isLoading: isAuthLoading } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!isAuthLoading && !user) {
-      router.replace("/login");
+    if (isLoaded && !isSignedIn) {
+      router.replace("/sign-in");
     }
-  }, [isAuthLoading, user, router]);
+  }, [isLoaded, isSignedIn, router]);
+
+  const { getToken } = useAuth();
 
   const { data: conversations = [], isLoading: isChatsLoading } = useQuery<Conversation[]>({
     queryKey: ["conversations"],
-    queryFn: () => fetchApi("/chats/"),
-    enabled: !!user,
+    queryFn: async () => {
+      const token = await getToken();
+      return fetchApi<Conversation[]>("/chats/", { token: token || undefined });
+    },
+    enabled: !!isSignedIn,
   });
 
-  const handleLogout = () => {
-    logout();
-    router.push("/login");
-  };
-
-  if (!isAuthLoading && !user) {
+  if (isLoaded && !isSignedIn) {
     return null;
   }
 
@@ -132,20 +139,27 @@ export default function ChatLayout({
 
         {/* User Footer */}
         <div className="p-3 border-t border-border shrink-0">
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-all group cursor-default">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-              <span className="text-xs font-medium text-primary-foreground">
-                {user?.email?.charAt(0).toUpperCase() || "U"}
-              </span>
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-all group">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 overflow-hidden">
+              {user?.imageUrl ? (
+                <img src={user.imageUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xs font-medium text-primary-foreground">
+                  {user?.emailAddresses?.[0]?.emailAddress?.charAt(0).toUpperCase() || "U"}
+                </span>
+              )}
             </div>
-            <span className="text-xs text-muted-foreground truncate flex-1">{user?.email}</span>
-            <button
-              onClick={handleLogout}
-              className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all opacity-0 group-hover:opacity-100"
-              title="Log out"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
+            <span className="text-xs text-muted-foreground truncate flex-1">
+              {user?.emailAddresses?.[0]?.emailAddress}
+            </span>
+            <SignOutButton>
+              <button
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all opacity-0 group-hover:opacity-100"
+                title="Log out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </SignOutButton>
           </div>
         </div>
       </aside>
